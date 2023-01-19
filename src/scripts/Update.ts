@@ -1927,8 +1927,15 @@ class Update implements Saveable {
         },
 
         '0.10.9': ({ playerData, saveData }) => {
-            //Hex Maniac Aster
-            saveData.statistics.temporaryBattleDefeated = Update.moveIndex(saveData.statistics.temporaryBattleDefeated, 112);
+            // Hex Maniac Aster
+            // saveData.statistics.temporaryBattleDefeated = Update.moveIndex(saveData.statistics.temporaryBattleDefeated, 112);
+            this.insertTempBattleIndexes(
+                '0.10.9',
+                saveData,
+                // Need to be in ascending index order
+                ['Hex Maniac Aster', 112]
+                // ['Something Else', 134]
+            );
         },
     };
 
@@ -2141,6 +2148,31 @@ class Update implements Saveable {
         const end = arr.splice(to);
         arr = [...arr, ...temp, ...end];
         return arr;
+    }
+
+    insertTempBattleIndexes(versionNum: string, saveData, ...tempBattles: [string, number][]) {
+        let error = false;
+        const verify = !!JSON.parse('$DEVELOPMENT') && versionNum === this.version;
+
+        tempBattles.forEach(([name, idx]) => {
+            if (verify) {
+                const expected = GameConstants.getTemporaryBattlesIndex(name);
+                if (idx !== expected) {
+                    console.error(
+                        `Error inserting statistic for temp battle ${name}`,
+                        `\nExpected: ${expected}, Received: ${idx}`
+                    );
+
+                    error = true;
+                }
+            }
+
+            saveData.statistics.temporaryBattleDefeated = Update.moveIndex(saveData.statistics.temporaryBattleDefeated, idx);
+        });
+
+        if (!error && verify) {
+            console.info('All new temp battles inserted correctly');
+        }
     }
 
     // If any pokemon names change in the data rename them,

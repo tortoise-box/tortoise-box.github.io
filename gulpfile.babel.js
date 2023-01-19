@@ -211,6 +211,7 @@ gulp.task('scripts', () => {
             const tsProject = typescript.createProject('tsconfig.json', { typescript: require('typescript') });
             const compileScripts = tsProject.src()
                 .pipe(replace('$VERSION', version))
+                .pipe(replace('$DEVELOPMENT', !!config.DEVELOPMENT))
                 .pipe(replace('$DISCORD_ENABLED', !!config.DISCORD_LOGIN_PROXY))
                 .pipe(replace('$DISCORD_LOGIN_PROXY', config.DISCORD_LOGIN_PROXY))
                 .pipe(tsProject())
